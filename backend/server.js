@@ -22,7 +22,7 @@ app.listen(port, '127.0.0.1', () => {
 app.post('/api/send', async (req, res) => {
     try {
         const { name, age } = req.body;
-        await pool.execute('INSERT INTO names (name, age, datetime) VALUES (?, ?, ?)', [name, age, new Date().toLocaleString('en-CA', {hour12: false}).replace(',', '')]);
+        await pool.execute('INSERT INTO names (name, age, datetime) VALUES (?, ?, ?)', [name, age, new Date()]);
         return res.status(200).json({});
     } catch (err) {
         console.log(err.stack);
