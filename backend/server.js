@@ -2,6 +2,7 @@ import path from 'path';
 import express from 'express';
 import { fileURLToPath } from 'url';
 import port from './src/port.js';
+import pool from './src/db.js';
 
 const app = express();
 
@@ -18,7 +19,14 @@ app.listen(port, '127.0.0.1', () => {
 
 // END BOILERPLATE.
 
-app.get('/api/name', (req, res) => {
-    return res.status(200).json({ message: 'Hey!' });
+app.post('/api/send', async (req, res) => {
+    try {
+        const { name, age } = req.body;
+        await pool.execute('INSERT INTO names (name, age, datetime) VALUES (?, ?, ?)', [name, age, new Date().toLocaleString('en-CA', {hour12: false}).replace(',', '')]);
+        return res.status(200).json({});
+    } catch (err) {
+        console.log(err.stack);
+        return res.status(500).json({ err });
+    }
 });
 
