@@ -30,3 +30,17 @@ app.post('/api/send', async (req, res) => {
     }
 });
 
+app.get('/api/cool', async (_req, res) => {
+    try {
+        const response = await fetch('https://bored-api.appbrewery.com/random');
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.err || 'Bored API Call Error');
+        }
+        return res.status(200).json({ data });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ err: err.message });
+    }
+});
+

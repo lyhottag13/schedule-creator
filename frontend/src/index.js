@@ -1,6 +1,8 @@
 import elements from "./utils/elements.js";
 async function main() {
     elements.submitButton.addEventListener('click', handleSubmit);
+    const {data} = await (await fetch('/api/cool')).json();
+    elements.span.textContent = data.activity;
 }
 
 async function handleSubmit() {
