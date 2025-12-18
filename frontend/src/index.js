@@ -1,28 +1,20 @@
 import elements from "./utils/elements.js";
+import axios from "axios";
+
 async function main() {
-    elements.submitButton.addEventListener('click', handleSubmit);
-    const {data} = await (await fetch('/api/cool')).json();
-    elements.span.textContent = data.activity;
+    try {
+        elements.submitButton.addEventListener('click', handleSubmit);
+    } catch (err) {
+        console.error(err);
+        window.alert('Something went wrong: ', err);
+    }
 }
 
 async function handleSubmit() {
-    try {
-        const name = elements.first.value;
-        const age = elements.second.value;
-        const response = await fetch('/api/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json'},
-            body: JSON.stringify({ name, age })
-        })
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.err || 'Something went wrong with the API call.');
-        }
-        window.alert('Everything is okay :)');
-    } catch (err) {
-        console.log(err.stack);
-        window.alert(err.message);
-    }
+    const courseNames = elements.input.name.value.split(' ');
+    const college = document.querySelector('input[name="college"]:checked').value;
+    const { data: { validSchedules, invalidSchedules } } = await axios.post('/api/course', { courseNames, college });
+    console.log({ validSchedules, invalidSchedules });
 }
 
 main();
