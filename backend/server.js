@@ -22,62 +22,67 @@ app.listen(port, '127.0.0.1', () => {
 
 app.post('/api/course', async (req, res) => {
     try {
+        console.time('timer');
         console.log('Request Received!');
-        const { courseNames, college } = req.body;
+        const { courseNames, colleges, times } = req.body;
+
         const courses = [];
-        const promises = [];
-        courseNames.forEach((name) => {
-            const urlString = `https://classes.sis.maricopa.edu/?keywords=${name}&institutions[]=${college}`;
-            console.log(urlString);
-            promises.push(axios.get(urlString));
+        const promises = []; // Requirement for parallel HTTP request.
+        courseNames.forEach(courseName => {
+            const urlString = `https://classes.sis.maricopa.edu/`;
+            promises.push(axios.get(urlString, {
+                params: {
+                    keywords: courseName,
+                    institutions: colleges,
+                }
+            }));
         });
 
-        // Parses all sites in parallel.
+        // GETs all sites in parallel.
         const responses = await Promise.all(promises);
+
+        // Parses responses
         responses.forEach(response => {
             const html = response.data;
             const options = getCourseInfo(html);
             courses.push(options);
         })
         console.log('Courses Parsed!');
-        let schedules = [[]];
+        let allSchedules = [[]];
 
         // Creates a Cartesian Product for all the options of each course input.
         courses.forEach(course => {
             const newSchedules = [];
-            schedules.forEach(schedule => {
+            allSchedules.forEach(schedule => {
                 course.forEach(option => {
                     const newSchedule = schedule.map((schedule) => { return schedule });
                     newSchedule.push(option);
                     newSchedules.push(newSchedule);
                 });
             });
-            schedules = newSchedules;
+            allSchedules = newSchedules;
         });
 
         // At this point, a schedule is an array of options.
 
+        // Filters out valid schedules.
         const validSchedules = [];
         const invalidSchedules = [];
-        schedules.forEach(schedule => {
-            console.log(schedule);
+        allSchedules.forEach(schedule => {
             for (let i = 0; i < schedule.length; i++) {
                 for (let j = i + 1; j < schedule.length; j++) {
-                    if (schedule[i].isInvalidDelivery() || schedule[j].isInvalidDelivery()) {
-                        invalidSchedules.push(schedule);
-                        return;
-                    }
-                    if (schedule[i].isOverlap(schedule[j])) {
-                        invalidSchedules.push(schedule);
-                        return;
+                    if (schedule[i].isInvalidDelivery() || schedule[j].isInvalidDelivery() || schedule[i].isOverlap(schedule[j]) || schedule[i].isInvalidTime(times) || schedule[j].isInvalidTime(times)) {
+                        return invalidSchedules.push(schedule);
                     }
                 }
             }
-            validSchedules.push(schedule);
+            return validSchedules.push(schedule);
         });
-
+        console.log(`Valid Schedules: ${validSchedules.length}, Invalid Schedules: ${invalidSchedules.length}`)
+        console.timeEnd('timer');
         return res.status(200).json({ validSchedules, invalidSchedules });
     } catch (err) {
+        console.timeEnd('timer');
         console.log(err);
         return res.status(500).json({ err: err.message });
     }
@@ -97,7 +102,6 @@ class Option {
     }
 
     isOverlap(otherClass) {
-        console.log(this, otherClass);
         const thisDays = this.days.split(',');
         const otherDays = otherClass.days.split(',');
 
@@ -120,6 +124,12 @@ class Option {
     isInvalidDelivery() {
         return !this.delivery.includes('Person');
     }
+    isInvalidTime(times) {
+        const thisTimes = this.times.split(' – ');
+        const startTime = convertToMinutes(thisTimes[0]);
+        const endTime = convertToMinutes(thisTimes[1]);
+        return (startTime < times[0] || endTime > times[1]);
+    }
 }
 
 /**
@@ -127,16 +137,18 @@ class Option {
  * @param {string} time The time string to convert
  */
 function convertToMinutes(time) {
-    console.log(time);
     const splitTime = time.split(':');
     const modifier = splitTime[1].slice(2); // AM or PM
-    let actualHours;
+    let actualHours = 0;
+    if (modifier === 'PM') {
+        actualHours += 12;
+    }
     if (splitTime[0] === '12' && modifier === 'PM') {
         actualHours = 12;
-    } else if (splitTime[0] === '12' && modifier === 'AM') {
+    } else if (splitTime[1] === '12' && modifier === 'AM') {
         actualHours = 0;
     } else {
-        actualHours = Number(splitTime[0]);
+        actualHours += Number(splitTime[0]);
     }
     const actualMinutes = actualHours * 60 + Number(splitTime[1].slice(0, 2));
     return actualMinutes;
