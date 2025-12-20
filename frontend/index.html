@@ -2,35 +2,68 @@
 
 <head>
     <link rel="stylesheet" href="src/index.css">
+    <link rel="icon" href="src/resources/images/calendar.ico">
+    <title>Maricopa CC Schedule Creator</title>
 </head>
 
 <body>
     <div id="app">
-        <span id="span"></span>
-        <input id="name">
-        <input id="second">
-        <input id="cgcc" type="checkbox" name="college" value="CGC08">
-        <label for="cgcc">CGCC</label>
-        <input id="emcc" type="checkbox" name="college" value="EMC10">
-        <label for="emcc">EMCC</label>
-        <input id="gwcc" type="checkbox" name="college" value="GWC03">
-        <label for="gwcc">GWCC</label>
-        <input id="gcc" type="checkbox" name="college" value="GCC02">
-        <label for="gcc">GCC</label>
-        <input id="mcc" type="checkbox" name="college" value="MCC04">
-        <label for="mcc">MCC</label>
-        <input id="pvcc" type="checkbox" name="college" value="PVC09">
-        <label for="pvcc">PVCC</label>
-        <input id="pc" type="checkbox" name="college" value="PCC01">
-        <label for="pc">PC</label>
-        <input id="rsc" type="checkbox" name="college" value="RSC06">
-        <label for="rsc">RSC</label>
-        <input id="scc" type="checkbox" name="college" value="SCC05">
-        <label for="scc">SCC</label>
-        <input id="smc" type="checkbox" name="college" value="SMC07">
-        <label for="smc">SMC</label>
-        <div id="time"></div>
+        <h1>Schedule Creator</h1>
+        <div>
+            <span>Input Course Names</span>
+            <input id="name">
+            <button id="add">Add</button>
+            <button id="clear">Clear</button>
+            <button id="submit">Submit</button>
+            <ul id="course-list">
+            </ul>
+        </div>
+        <div id="colleges">
+            <label>
+                <input id="cgcc" type="checkbox" name="college" value="CGC08">
+                CGCC
+            </label>
+            <label>
+                <input id="emcc" type="checkbox" name="college" value="EMC10">
+                EMCC
+            </label>
+            <label>
+                <input id="gwcc" type="checkbox" name="college" value="GWC03">
+                GWCC
+            </label>
+            <label>
+                <input id="gcc" type="checkbox" name="college" value="GCC02">
+                GCC
+            </label>
+            <label>
+                <input id="mcc" type="checkbox" name="college" value="MCC04">
+                MCC
+            </label>
+            <label>
+                <input id="pvcc" type="checkbox" name="college" value="PVC09">
+                PVCC
+            </label>
+            <label>
+                <input id="pc" type="checkbox" name="college" value="PCC01">
+                PC
+            </label>
+            <label>
+                <input id="rsc" type="checkbox" name="college" value="RSC06">
+                RSC
+            </label>
+            <label>
+                <input id="scc" type="checkbox" name="college" value="SCC05">
+                SCC
+            </label>
+            <label>
+                <input id="smc" type="checkbox" name="college" value="SMC07">
+                SMCC
+            </label>
+        </div>
+        <div id="time-container">
+            <span id="span"></span>
+            <div id="time"></div>
+        </div>
     </div>
-    <button id="submit">Submit</button>
     <script type="module" src="src/index.js"></script>
 </body>

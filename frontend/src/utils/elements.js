@@ -7,8 +7,15 @@ const elements = {
     div: {
         time: document.getElementById('time')
     },
-    second: document.getElementById('second'),
-    submitButton: document.getElementById('submit'),
+    button: {
+        submit: document.getElementById('submit'),
+        add: document.getElementById('add'),
+        clear: document.getElementById('clear')
+    },
+    ul: {
+        /** @type HTMLUListElement*/
+        courseList: document.getElementById('course-list')
+    },
     span: document.getElementById('span')
 }  
 export default elements;

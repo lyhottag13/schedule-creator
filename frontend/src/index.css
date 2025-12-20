@@ -3,3 +3,24 @@
     left: 50%;
     top: 50%;
 } */
+ #colleges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(5, 1fr);
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    /* font-size: 50px; */
+    right: 10vw;
+    top: 10vh;
+    position: absolute;
+    background-color: rgb(176, 176, 255);
+ }
+
+ #time-container {
+    position: absolute;
+    top: 30vh;
+    left: 50vw;
+    transform: translateX(-50%);
+    background-color: rgb(255, 217, 217);
+    width: 80vw;
+    height: 20vh;
+ }

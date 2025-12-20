@@ -4,8 +4,9 @@ import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 
 async function main() {
-    elements.submitButton.addEventListener('click', handleSubmit);
-    console.log(elements.div.time);
+    elements.button.submit.addEventListener('click', handleSubmit);
+    elements.button.add.addEventListener('click', handleAdd);
+    elements.button.clear.addEventListener('click', handleClear);
     noUiSlider.create(elements.div.time, {
         start: [480, 1020],
         connect: true,
@@ -18,18 +19,43 @@ async function main() {
     elements.div.time.noUiSlider.on('update', (values) => {
         const startTime = convertToTime(values[0]);
         const endTime = convertToTime(values[1]);
-        elements.span.textContent = `${startTime} - ${endTime};`
+        elements.span.textContent = `${startTime} - ${endTime}`
     });
 }
 
 async function handleSubmit() {
-    const courseNames = elements.input.name.value.split(' ');
-    const colleges = Array.from(document.querySelectorAll('input[name="college"]:checked')).map(checkbox => checkbox.value);
-    const times = elements.div.time.noUiSlider.get(true);
-    console.log('Request Sent!');
-    const { data: { validSchedules, invalidSchedules } } = await axios.post('/api/course', { courseNames, colleges, times });
-    console.log('Schedules Received!');
-    console.log({ validSchedules, invalidSchedules });
+    try {
+        const courseNames = Array.from(elements.ul.courseList.children).map(li => li.textContent);
+        const colleges = Array.from(document.querySelectorAll('input[name="college"]:checked')).map(checkbox => checkbox.value);
+        const times = elements.div.time.noUiSlider.get(true);
+
+        console.log('Request Sent!');
+
+        const { data: { validSchedules, invalidSchedules } } = await axios.post('/api/course', { courseNames, colleges, times });
+
+        console.log('Schedules Received!');
+        console.log({ validSchedules, invalidSchedules });
+    } catch (err) {
+        console.log(err);
+        window.alert(err.message);
+    }
+}
+
+function handleAdd() {
+    const courseName = elements.input.name.value.trim().toUpperCase();
+
+    if (/^[A-Za-z]{3}\d\d\d$/.test(courseName)) {
+        const newListElement = document.createElement('li');
+        newListElement.textContent = courseName;
+        elements.ul.courseList.append(newListElement);
+    } else {
+        window.alert('Invalid course name (ex: ECE102)');
+    }
+    elements.input.name.value = '';
+}
+
+function handleClear() {
+    elements.ul.courseList.replaceChildren();
 }
 
 function convertToTime(minutes) {
