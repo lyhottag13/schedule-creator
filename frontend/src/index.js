@@ -7,6 +7,9 @@ async function main() {
     elements.button.submit.addEventListener('click', handleSubmit);
     elements.button.add.addEventListener('click', handleAdd);
     elements.button.clear.addEventListener('click', handleClear);
+    elements.input.name.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleAdd();
+    });
     noUiSlider.create(elements.div.time, {
         start: [480, 1020],
         connect: true,
@@ -31,10 +34,10 @@ async function handleSubmit() {
 
         console.log('Request Sent!');
 
-        const { data: { validSchedules, invalidSchedules } } = await axios.post('/api/course', { courseNames, colleges, times });
+        const { data: { validSchedules } } = await axios.post('/api/course', { courseNames, colleges, times }, { timeout: 10000 });
 
         console.log('Schedules Received!');
-        console.log({ validSchedules, invalidSchedules });
+        console.log({ validSchedules });
     } catch (err) {
         console.log(err);
         window.alert(err.message);
@@ -43,9 +46,9 @@ async function handleSubmit() {
 
 function handleAdd() {
     const courseName = elements.input.name.value.trim().toUpperCase();
-
     if (/^[A-Za-z]{3}\d\d\d$/.test(courseName)) {
         const newListElement = document.createElement('li');
+        newListElement.addEventListener('click', function () { this.remove() });
         newListElement.textContent = courseName;
         elements.ul.courseList.append(newListElement);
     } else {

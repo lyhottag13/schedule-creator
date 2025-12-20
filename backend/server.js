@@ -48,39 +48,75 @@ app.post('/api/course', async (req, res) => {
             courses.push(options);
         })
         console.log('Courses Parsed!');
-        let allSchedules = [[]];
+        // let validSchedules = [[]];
+        // let validSchedulesCount = 0;
+        // let invalidSchedulesCount = 0;
+        // let parseCount = 0;
 
         // Creates a Cartesian Product for all the options of each course input.
-        courses.forEach(course => {
+        // courses.forEach(course => {
+        //     const newSchedules = [];
+        //     validSchedules.forEach(schedule => {
+        //         course.forEach(option => {
+        //             console.log(`Parse Count: ${++parseCount}`);
+        //             if (option.isInvalidDelivery() || option.isInvalidTime(times)) {
+        //                 invalidSchedulesCount++;
+        //                 return;
+        //             }
+
+        //             const newSchedule = schedule.slice();
+        //             const isOverlap = newSchedule.some(oldOption => { return option.isOverlap(oldOption) })
+        //             if (isOverlap) {
+        //                 invalidSchedulesCount++;
+        //                 return;
+        //             }
+        //             newSchedule.push(option);
+        //             newSchedules.push(newSchedule);
+        //             validSchedulesCount++;
+        //         });
+        //     });
+        //     validSchedules = newSchedules;
+        // });
+
+        // const newValids = courses.reduce((schedules, course) => {
+        //     const newSchedules = course.flatMap(option => {
+        //         if (option.isInvalidDelivery() || option.isInvalidTime(times)) {
+        //             return [];
+        //         }
+        //         return schedules.flatMap(schedule => {
+        //             if (schedule.some(oldOption => { return oldOption.isOverlap(option) })) {
+        //                 return [];
+        //             }
+        //             return [schedule.concat(option)];
+        //         });
+        //     });
+        //     return newSchedules;
+        // }, [[]]);
+
+        console.log('Creating Valid Schedules!');
+        // Creates a Cartesian Product for all the options of each course input and filters accordingly.
+        let rejects = 0;
+        const validSchedules = courses.reduce((schedules, course) => {
             const newSchedules = [];
-            allSchedules.forEach(schedule => {
-                course.forEach(option => {
-                    const newSchedule = schedule.map((schedule) => { return schedule });
-                    newSchedule.push(option);
-                    newSchedules.push(newSchedule);
-                });
-            });
-            allSchedules = newSchedules;
-        });
-
-        // At this point, a schedule is an array of options.
-
-        // Filters out valid schedules.
-        const validSchedules = [];
-        const invalidSchedules = [];
-        allSchedules.forEach(schedule => {
-            for (let i = 0; i < schedule.length; i++) {
-                for (let j = i + 1; j < schedule.length; j++) {
-                    if (schedule[i].isInvalidDelivery() || schedule[j].isInvalidDelivery() || schedule[i].isOverlap(schedule[j]) || schedule[i].isInvalidTime(times) || schedule[j].isInvalidTime(times)) {
-                        return invalidSchedules.push(schedule);
+            for (const newOption of course) {
+                if (newOption.isInvalidDelivery() || newOption.isInvalidTime(times)) {
+                    rejects++;
+                    continue;
+                };
+                for (const schedule of schedules) {
+                    if (schedule.some(oldOption => oldOption.isOverlap(newOption))) {
+                        rejects++;
+                        continue;
                     }
+                    newSchedules.push(schedule.concat(newOption));
                 }
             }
-            return validSchedules.push(schedule);
-        });
-        console.log(`Valid Schedules: ${validSchedules.length}, Invalid Schedules: ${invalidSchedules.length}`)
+            return newSchedules;
+        }, [[]]);
+
+        console.log(`Valid Schedules: ${validSchedules.length}, Rejected Attempts: ${rejects}`);
         console.timeEnd('timer');
-        return res.status(200).json({ validSchedules, invalidSchedules });
+        return res.status(200).json({ validSchedules });
     } catch (err) {
         console.timeEnd('timer');
         console.log(err);
@@ -94,11 +130,11 @@ class Option {
         this.number = number;
         this.location = location.replace('\n        ', ' @ ');
         this.delivery = delivery;
-        this.dates = dates;
+        this.dates = dates.split('\n')[0];
         this.days = days;
         this.times = times;
         this.instructors = instructors;
-        this.availability = availability;
+        this.availability = availability.split('\n')[3];
     }
 
     isOverlap(otherClass) {
@@ -161,11 +197,11 @@ function getCourseInfo(html) {
     const optionName = $('div.course h3').text().trim().slice(0, 6);
     const options = [];
 
-    optionSpecs.each((i, element) => {
+    optionSpecs.each((_, element) => {
         const option = [optionName];
         const specs = $(element).find('td');
 
-        specs.each((i, spec) => {
+        specs.each((_, spec) => {
             option.push($(spec).text().trim());
         });
         const optionObject = new Option(...option);
