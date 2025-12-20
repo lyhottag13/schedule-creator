@@ -4,11 +4,18 @@ import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 
 async function main() {
+    document.addEventListener('keypress', e => {
+        if (e.key === '`') handleSubmit();
+    })
     elements.button.submit.addEventListener('click', handleSubmit);
     elements.button.add.addEventListener('click', handleAdd);
     elements.button.clear.addEventListener('click', handleClear);
     elements.input.name.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleAdd();
+    });
+    elements.input.name.addEventListener('input', function () {
+        this.value = this.value.replaceAll(/[^A-Za-z0-9]/g, '');
+        this.value = this.value.toUpperCase();
     });
     noUiSlider.create(elements.div.time, {
         start: [480, 1020],
@@ -28,6 +35,10 @@ async function main() {
 
 async function handleSubmit() {
     try {
+        const list = elements.ul.courseList.children;
+        if (list.length === 0) {
+            return window.alert('Enter a course!');
+        }
         const courseNames = Array.from(elements.ul.courseList.children).map(li => li.textContent);
         const colleges = Array.from(document.querySelectorAll('input[name="college"]:checked')).map(checkbox => checkbox.value);
         const times = elements.div.time.noUiSlider.get(true);
@@ -46,13 +57,13 @@ async function handleSubmit() {
 
 function handleAdd() {
     const courseName = elements.input.name.value.trim().toUpperCase();
-    if (/^[A-Za-z]{3}\d\d\d$/.test(courseName)) {
+    if (/^[A-Za-z]{3}\d{3}$/.test(courseName)) {
         const newListElement = document.createElement('li');
         newListElement.addEventListener('click', function () { this.remove() });
         newListElement.textContent = courseName;
         elements.ul.courseList.append(newListElement);
     } else {
-        window.alert('Invalid course name (ex: ECE102)');
+        window.alert('Enter a valid course name (ex: ECE102)');
     }
     elements.input.name.value = '';
 }

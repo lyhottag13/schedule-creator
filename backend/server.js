@@ -47,55 +47,13 @@ app.post('/api/course', async (req, res) => {
             const options = getCourseInfo(html);
             courses.push(options);
         })
+
         console.log('Courses Parsed!');
-        // let validSchedules = [[]];
-        // let validSchedulesCount = 0;
-        // let invalidSchedulesCount = 0;
-        // let parseCount = 0;
-
-        // Creates a Cartesian Product for all the options of each course input.
-        // courses.forEach(course => {
-        //     const newSchedules = [];
-        //     validSchedules.forEach(schedule => {
-        //         course.forEach(option => {
-        //             console.log(`Parse Count: ${++parseCount}`);
-        //             if (option.isInvalidDelivery() || option.isInvalidTime(times)) {
-        //                 invalidSchedulesCount++;
-        //                 return;
-        //             }
-
-        //             const newSchedule = schedule.slice();
-        //             const isOverlap = newSchedule.some(oldOption => { return option.isOverlap(oldOption) })
-        //             if (isOverlap) {
-        //                 invalidSchedulesCount++;
-        //                 return;
-        //             }
-        //             newSchedule.push(option);
-        //             newSchedules.push(newSchedule);
-        //             validSchedulesCount++;
-        //         });
-        //     });
-        //     validSchedules = newSchedules;
-        // });
-
-        // const newValids = courses.reduce((schedules, course) => {
-        //     const newSchedules = course.flatMap(option => {
-        //         if (option.isInvalidDelivery() || option.isInvalidTime(times)) {
-        //             return [];
-        //         }
-        //         return schedules.flatMap(schedule => {
-        //             if (schedule.some(oldOption => { return oldOption.isOverlap(option) })) {
-        //                 return [];
-        //             }
-        //             return [schedule.concat(option)];
-        //         });
-        //     });
-        //     return newSchedules;
-        // }, [[]]);
-
         console.log('Creating Valid Schedules!');
+
         // Creates a Cartesian Product for all the options of each course input and filters accordingly.
         let rejects = 0;
+        let parseCount = 0;
         const validSchedules = courses.reduce((schedules, course) => {
             const newSchedules = [];
             for (const newOption of course) {
@@ -104,6 +62,7 @@ app.post('/api/course', async (req, res) => {
                     continue;
                 };
                 for (const schedule of schedules) {
+                    console.log(`Schedules Checked: ${++parseCount}`);
                     if (schedule.some(oldOption => oldOption.isOverlap(newOption))) {
                         rejects++;
                         continue;
